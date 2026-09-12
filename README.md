@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🍅 Voice-Ack Pomodoro
 
-## Getting Started
+A Pomodoro timer with a twist: instead of tapping a button to silence the alarm, you **speak a personal "magic word"** to acknowledge that a lock-in or rest period is over. The app tracks how long you take to say it, and when you end a session it reveals a **Session Summary** that labels you with a gamified archetype — Locked-In Legend, The Negotiator, Tab Wanderer, and more.
 
-First, run the development server:
+Built with Next.js 16, React 19, and Tailwind v4. No accounts, no backend — everything runs client-side.
+
+## Features
+
+- **Configurable cycles** — set lock-in / short-break / long-break durations and how many lock-ins happen before the long break (defaults: 25 / 5 / 30, 4 cycles).
+- **Voice acknowledgment** — say your keyword into the mic to stop the buzzer and move to the next phase (Web Speech API, Chrome/Edge). A manual "I'm done" button is always available as a fallback for other browsers or noisy rooms.
+- **Overtime tracking** — a live counter shows how long you've let the buzzer run before acknowledging, feeding into your end-of-session archetype.
+- **Focus-loss tracking** — tab switches / window blur during lock-ins are tracked and factored into your summary.
+- **Ambient focus sound** — optional synthesized white noise or filtered "rain" during lock-in phases.
+- **Session Summary** — end anytime with "End Pomodoro" to see your archetype, stats, and a downloadable summary card (PNG).
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). Grant microphone access when prompted to use voice acknowledgment (Chrome/Edge recommended — see [Browser support](#browser-support)).
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Append `?fast=1` to the URL during development to shrink every phase to a few seconds, for quickly exercising a full cycle without waiting real minutes.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Browser support
 
-## Learn More
+Voice acknowledgment relies on the (webkit-prefixed) `SpeechRecognition` API, which is reliably supported in Chrome and Edge but not Firefox or Safari. The app feature-detects this and falls back to a manual acknowledge button everywhere — voice is a bonus, never a requirement.
 
-To learn more about Next.js, take a look at the following resources:
+## Project structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+  app/            Next.js App Router entry (page.js, layout.js, globals.css)
+  components/     UI: timer display, overtime banner, controls, settings, summary
+  hooks/          usePomodoroEngine, useVoiceAck, useBuzzer, useAmbientSound,
+                  useVisibilityTracker, useLocalStorage
+  lib/            phaseSchedule, archetypes, sessionMetrics, summaryCard, constants
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Backlog / ideas
 
-## Deploy on Vercel
+Not built yet, considered for a future pass:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Accounts + cross-device history sync (Supabase)
+- History dashboard with streaks / heatmap across sessions
+- Real licensed ambient/lo-fi audio tracks
+- Social sharing / leaderboards
+- PWA install + push notifications
+- Multi-language keyword matching
