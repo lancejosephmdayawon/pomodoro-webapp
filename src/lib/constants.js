@@ -6,6 +6,16 @@ export const DEFAULT_SETTINGS = {
   keyword: "done",
   ambientSound: "none", // 'none' | 'white' | 'rain'
   soundEnabled: true,
+  // Theme accents — default is pure grayscale; users can swap in real color.
+  primaryColor: "#f5f5f5", // lock-in accent + main CTA
+  secondaryColor: "#a1a1aa", // short-break accent
+  tertiaryColor: "#52525b", // long-break accent
+};
+
+export const DEFAULT_THEME = {
+  primaryColor: DEFAULT_SETTINGS.primaryColor,
+  secondaryColor: DEFAULT_SETTINGS.secondaryColor,
+  tertiaryColor: DEFAULT_SETTINGS.tertiaryColor,
 };
 
 export const PHASE_TYPES = {
