@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  /* The Pomodoro UI is deliberately a fixed dark "focus room" look
-     regardless of system theme, so it reads consistently in-session. */
-  --background: #0b1120;
-  --foreground: #f8fafc;
+  /* Flat black / white / grayscale shell. Accent colors (lock-in / short
+     break / long break) are user-customizable and applied inline per
+     component — see settings.primaryColor / secondaryColor / tertiaryColor. */
+  --background: #09090b;
+  --foreground: #fafafa;
 }
 
 @theme inline {
@@ -15,8 +16,23 @@
 }
 
 body {
-  background: radial-gradient(circle at top, #1e293b 0%, var(--background) 60%);
+  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   min-height: 100vh;
+}
+
+input[type="color"] {
+  -webkit-appearance: none;
+  appearance: none;
+  border: none;
+  padding: 0;
+  background: none;
+}
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 9999px;
 }

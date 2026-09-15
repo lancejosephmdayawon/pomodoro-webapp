@@ -2,41 +2,35 @@
 
 import { PHASE_LABELS, PHASE_TYPES } from "../lib/constants";
 import { formatMMSS } from "../lib/format";
+import { withAlpha } from "../lib/color";
 
-const PHASE_THEME = {
-  [PHASE_TYPES.LOCK_IN]: {
-    ring: "border-amber-400",
-    text: "text-amber-300",
-    chip: "bg-amber-400/10 text-amber-300 border-amber-400/30",
-  },
-  [PHASE_TYPES.SHORT_BREAK]: {
-    ring: "border-teal-400",
-    text: "text-teal-300",
-    chip: "bg-teal-400/10 text-teal-300 border-teal-400/30",
-  },
-  [PHASE_TYPES.LONG_BREAK]: {
-    ring: "border-violet-400",
-    text: "text-violet-300",
-    chip: "bg-violet-400/10 text-violet-300 border-violet-400/30",
-  },
-};
+export function TimerDisplay({ phaseType, remainingSec, cyclePosition, theme }) {
+  const accent =
+    phaseType === PHASE_TYPES.SHORT_BREAK
+      ? theme.secondaryColor
+      : phaseType === PHASE_TYPES.LONG_BREAK
+        ? theme.tertiaryColor
+        : theme.primaryColor;
 
-export function TimerDisplay({ phaseType, remainingSec, cyclePosition }) {
-  const theme = PHASE_THEME[phaseType] ?? PHASE_THEME[PHASE_TYPES.LOCK_IN];
   const { lockInSlot, totalSlots } = cyclePosition;
 
   return (
     <div className="flex flex-col items-center gap-6">
       <span
-        className={`rounded-full border px-4 py-1 text-sm font-medium tracking-wide uppercase ${theme.chip}`}
+        className="rounded-full border px-4 py-1 text-xs font-medium tracking-widest uppercase"
+        style={{ color: accent, borderColor: withAlpha(accent, 0.35), backgroundColor: withAlpha(accent, 0.08) }}
       >
         {PHASE_LABELS[phaseType]}
       </span>
 
       <div
-        className={`flex h-64 w-64 items-center justify-center rounded-full border-8 ${theme.ring} bg-black/20 sm:h-72 sm:w-72`}
+        className="flex h-64 w-64 items-center justify-center rounded-full border-[6px] bg-white/[0.02] sm:h-72 sm:w-72"
+        style={{ borderColor: accent }}
       >
-        <span className={`font-mono text-6xl font-bold tabular-nums ${theme.text} sm:text-7xl`}>
+        <span
+          className="font-mono text-6xl font-bold tabular-nums sm:text-7xl"
+          style={{ color: accent }}
+        >
           {formatMMSS(remainingSec)}
         </span>
       </div>
@@ -51,15 +45,12 @@ export function TimerDisplay({ phaseType, remainingSec, cyclePosition }) {
             <span
               key={i}
               title={isReward ? "Long break" : `Lock-in ${slot}`}
-              className={[
-                "h-2.5 rounded-full transition-all",
-                isReward ? "w-5" : "w-2.5",
-                state === "done" && "bg-amber-400",
-                state === "current" && "bg-white",
-                state === "upcoming" && "bg-white/20",
-              ]
-                .filter(Boolean)
-                .join(" ")}
+              className={`h-2.5 rounded-full transition-all ${isReward ? "w-5" : "w-2.5"}`}
+              style={{
+                backgroundColor:
+                  state === "upcoming" ? "rgba(255,255,255,0.12)" : theme.primaryColor,
+                opacity: state === "current" ? 1 : state === "done" ? 0.7 : 1,
+              }}
             />
           );
         })}

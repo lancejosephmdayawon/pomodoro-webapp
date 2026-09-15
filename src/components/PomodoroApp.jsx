@@ -15,6 +15,7 @@ import { OvertimeBanner } from "./OvertimeBanner";
 import { ControlBar } from "./ControlBar";
 import { SettingsModal } from "./SettingsModal";
 import { SessionSummary } from "./SessionSummary";
+import { Brand } from "./Brand";
 
 export function PomodoroApp() {
   const [settings, updateSettings] = useLocalStorage(LOCALSTORAGE_SETTINGS_KEY, DEFAULT_SETTINGS);
@@ -66,22 +67,37 @@ export function PomodoroApp() {
     return { metrics, archetype: classifySession(metrics) };
   }, [status, log]);
 
+  const theme = {
+    primaryColor: settings.primaryColor,
+    secondaryColor: settings.secondaryColor,
+    tertiaryColor: settings.tertiaryColor,
+  };
+  const currentAccent =
+    phaseType === PHASE_TYPES.SHORT_BREAK
+      ? theme.secondaryColor
+      : phaseType === PHASE_TYPES.LONG_BREAK
+        ? theme.tertiaryColor
+        : theme.primaryColor;
+
   return (
     <div className="flex min-h-full flex-col items-center justify-center gap-8 px-4 py-10">
-      <div className="text-center">
-        <h1 className="text-xl font-semibold text-white/90">🍅 Voice-Ack Pomodoro</h1>
-        <p className="text-sm text-white/40">Say the word. Break the buzzer.</p>
-      </div>
+      <Brand />
 
       {status === STATUS.FINISHED && summary ? (
         <SessionSummary
           metrics={summary.metrics}
           archetype={summary.archetype}
           onNewSession={() => engine.reset()}
+          accentColor={theme.primaryColor}
         />
       ) : (
         <>
-          <TimerDisplay phaseType={phaseType} remainingSec={remainingSec} cyclePosition={cyclePosition} />
+          <TimerDisplay
+            phaseType={phaseType}
+            remainingSec={remainingSec}
+            cyclePosition={cyclePosition}
+            theme={theme}
+          />
 
           {status === STATUS.AWAITING_ACK && (
             <OvertimeBanner
@@ -90,6 +106,7 @@ export function PomodoroApp() {
               voiceSupported={voice.supported}
               voiceListening={voice.listening}
               onAcknowledge={handleAcknowledge}
+              accentColor={currentAccent}
             />
           )}
 
@@ -101,6 +118,7 @@ export function PomodoroApp() {
             onSkip={handleSkip}
             onEndSession={engine.endSession}
             onOpenSettings={() => setSettingsOpen(true)}
+            accentColor={currentAccent}
           />
         </>
       )}
