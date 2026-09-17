@@ -111,7 +111,7 @@ const RULES = [
     when: () => true, // fallback, always matches
     receipts: (m) => [
       `${m.completedLockIns} lock-in(s), ${m.completedBreaks} break(s)`,
-      `${Math.round(m.voiceUsageRate * 100)}% acknowledged by voice`,
+      `${fmt1(m.totalFocusMinutes)} focus min logged`,
     ],
   },
 ];

@@ -1,13 +1,77 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { BUZZER_SOUNDS } from "../lib/buzzerSounds";
 
 /**
- * Synthesized alarm tone via Web Audio — no external asset needed, so
- * nothing to license or host. Plays a short beep burst on a loop while
- * `active` is true.
+ * Schedules one "hit" of the given alarm pattern starting at `ctx.currentTime`.
+ * All synthesized (oscillators + gain envelopes) — no external audio assets.
  */
-export function useBuzzer(active, { enabled = true, volume = 0.4 } = {}) {
+function playHit(ctx, kind, volume) {
+  const now = ctx.currentTime;
+
+  const tone = (freq, type, start, duration, peak) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, start);
+    gain.gain.linearRampToValueAtTime(peak, start + Math.min(0.02, duration / 4));
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(start);
+    osc.stop(start + duration + 0.02);
+  };
+
+  switch (kind) {
+    case "chime":
+      // Two soft notes, sine wave — a gentler alternative to a harsh beep.
+      tone(880, "sine", now, 0.4, volume);
+      tone(659, "sine", now + 0.18, 0.42, volume);
+      break;
+
+    case "digital":
+      // Rapid triple beep, higher pitched and sharper.
+      tone(1200, "square", now, 0.08, volume);
+      tone(1200, "square", now + 0.12, 0.08, volume);
+      tone(1200, "square", now + 0.24, 0.08, volume);
+      break;
+
+    case "bell":
+      // A struck bell: fundamental + a couple of overtone partials decaying
+      // together, much longer than the other patterns.
+      tone(520, "sine", now, 1.1, volume);
+      tone(520 * 2.4, "sine", now, 1.0, volume * 0.5);
+      tone(520 * 3.8, "sine", now, 0.9, volume * 0.3);
+      break;
+
+    case "classic":
+    default:
+      tone(880, "square", now, 0.28, volume);
+      break;
+  }
+}
+
+/**
+ * Plays one instance of `kind` immediately, for a "preview" button — opens a
+ * short-lived AudioContext and closes it shortly after. Independent of the
+ * useBuzzer hook's active/looping lifecycle.
+ */
+export function previewBuzzerSound(kind, volume = 0.4) {
+  const AudioContextClass =
+    typeof window !== "undefined" && (window.AudioContext || window.webkitAudioContext);
+  if (!AudioContextClass) return;
+
+  const ctx = new AudioContextClass();
+  if (ctx.state === "suspended") ctx.resume();
+  playHit(ctx, kind, volume);
+  setTimeout(() => ctx.close(), 2000);
+}
+
+/**
+ * Loops the alarm pattern for `kind` via Web Audio while `active` is true.
+ */
+export function useBuzzer(active, { enabled = true, volume = 0.4, kind = "classic" } = {}) {
   const ctxRef = useRef(null);
 
   useEffect(() => {
@@ -22,23 +86,13 @@ export function useBuzzer(active, { enabled = true, volume = 0.4 } = {}) {
     ctxRef.current = ctx;
     if (ctx.state === "suspended") ctx.resume();
 
-    const playBeep = () => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "square";
-      osc.frequency.value = 880;
-      gain.gain.setValueAtTime(0, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + 0.02);
-      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.28);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.3);
-    };
+    const intervalMs = BUZZER_SOUNDS[kind]?.intervalMs ?? BUZZER_SOUNDS.classic.intervalMs;
 
-    playBeep();
-    const intervalId = setInterval(playBeep, 600);
+    const hit = () => playHit(ctx, kind, volume);
+    hit();
+    const intervalId = setInterval(hit, intervalMs);
     return () => clearInterval(intervalId);
-  }, [active, enabled, volume]);
+  }, [active, enabled, volume, kind]);
 
   // Tear down the AudioContext only when the component using this hook unmounts.
   useEffect(() => {

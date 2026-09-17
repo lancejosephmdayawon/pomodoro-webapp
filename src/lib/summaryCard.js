@@ -79,7 +79,7 @@ export function drawSummaryCard(canvas, { archetype, metrics, dateLabel, accentC
     ["Tab switches (lock-in)", `${metrics.totalTabSwitches}`],
     ["Focus minutes", `${round1(metrics.totalFocusMinutes)}`],
     ["Break minutes", `${round1(metrics.totalBreakMinutes)}`],
-    ["Voice acknowledgments", `${Math.round(metrics.voiceUsageRate * 100)}%`],
+    ["Phases skipped", `${metrics.skippedPhases}`],
   ];
 
   const startY = 660;

@@ -5,7 +5,7 @@ import { PHASE_TYPES } from "./constants";
  * aggregate numbers the archetype engine and summary UI read from.
  *
  * log entry shape:
- *   { phaseType, plannedSec, overtimeSec, endedBy: 'voice'|'manual'|'sessionEnded',
+ *   { phaseType, plannedSec, overtimeSec, endedBy: 'manual'|'skipped',
  *     tabSwitchCount, distractedSec, timestamp }
  */
 export function computeSessionMetrics(log) {
@@ -23,9 +23,7 @@ export function computeSessionMetrics(log) {
   const totalDistractedSec = sum(lockIns.map((e) => e.distractedSec || 0));
   const totalFocusSec = sum(lockIns.map((e) => e.plannedSec));
   const totalBreakSec = sum(breaks.map((e) => e.plannedSec));
-  const voiceAcks = log.filter((e) => e.endedBy === "voice").length;
-  const ackablePhases = log.filter((e) => e.endedBy !== "sessionEnded").length;
-  const voiceUsageRate = ackablePhases > 0 ? voiceAcks / ackablePhases : 0;
+  const skippedPhases = log.filter((e) => e.endedBy === "skipped").length;
 
   return {
     completedPhases,
@@ -37,7 +35,7 @@ export function computeSessionMetrics(log) {
     totalDistractedSec,
     totalFocusMinutes: totalFocusSec / 60,
     totalBreakMinutes: totalBreakSec / 60,
-    voiceUsageRate,
+    skippedPhases,
   };
 }
 

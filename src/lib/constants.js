@@ -3,9 +3,11 @@ export const DEFAULT_SETTINGS = {
   shortBreakMinutes: 5,
   longBreakMinutes: 30,
   cyclesBeforeLongBreak: 4,
-  keyword: "done",
-  ambientSound: "none", // 'none' | 'white' | 'rain'
+  ambientSound: "none", // 'none' | one of the keys in lib/ambientSounds.js
+  ambientVolume: 0.35, // 0-1, master slider; per-sound `boost` layers on top
   soundEnabled: true,
+  buzzerSound: "classic", // one of the keys in lib/buzzerSounds.js
+  buzzerVolume: 0.4, // 0-1
   // Theme accents — default is pure grayscale; users can swap in real color.
   primaryColor: "#f5f5f5", // lock-in accent + main CTA
   secondaryColor: "#a1a1aa", // short-break accent

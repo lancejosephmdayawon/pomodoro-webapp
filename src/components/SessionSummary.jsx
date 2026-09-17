@@ -83,10 +83,7 @@ export function SessionSummary({ metrics, archetype, onNewSession, accentColor }
           value={`${round1(metrics.avgBreakOvertimeSec)}s`}
         />
         <StatTile label="Tab switches" value={metrics.totalTabSwitches} />
-        <StatTile
-          label="Voice acknowledgments"
-          value={`${Math.round(metrics.voiceUsageRate * 100)}%`}
-        />
+        <StatTile label="Phases skipped" value={metrics.skippedPhases} />
       </div>
 
       <div className="mt-2 flex w-full gap-2">

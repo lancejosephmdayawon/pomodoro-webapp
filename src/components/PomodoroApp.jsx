@@ -6,7 +6,6 @@ import { computeSessionMetrics } from "../lib/sessionMetrics";
 import { classifySession } from "../lib/archetypes";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { usePomodoroEngine } from "../hooks/usePomodoroEngine";
-import { useVoiceAck } from "../hooks/useVoiceAck";
 import { useBuzzer } from "../hooks/useBuzzer";
 import { useAmbientSound } from "../hooks/useAmbientSound";
 import { useVisibilityTracker } from "../hooks/useVisibilityTracker";
@@ -39,27 +38,30 @@ export function PomodoroApp() {
     isLockIn && (status === STATUS.RUNNING || status === STATUS.AWAITING_ACK);
   const tracker = useVisibilityTracker(visibilityActive);
 
-  useBuzzer(status === STATUS.AWAITING_ACK, { enabled: settings.soundEnabled });
-  useAmbientSound(settings.ambientSound, { active: status === STATUS.RUNNING && isLockIn });
+  useBuzzer(status === STATUS.AWAITING_ACK, {
+    enabled: settings.soundEnabled,
+    kind: settings.buzzerSound,
+    volume: settings.buzzerVolume,
+  });
+  useAmbientSound(settings.ambientSound, {
+    active: status === STATUS.RUNNING && isLockIn,
+    volume: settings.ambientVolume,
+  });
 
   const handleAcknowledge = useCallback(
-    (source) => {
-      engine.acknowledge(source, tracker.getStatsAndReset());
+    () => {
+      engine.acknowledge("manual", tracker.getStatsAndReset());
     },
-    [engine, tracker]
+    // Depend on the specific stable functions, not the `engine`/`tracker`
+    // wrapper objects — those are recreated every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [engine.acknowledge, tracker.getStatsAndReset]
   );
-
-  const handleVoiceMatch = useCallback(() => handleAcknowledge("voice"), [handleAcknowledge]);
-
-  const voice = useVoiceAck({
-    active: status === STATUS.AWAITING_ACK,
-    keyword: settings.keyword,
-    onMatch: handleVoiceMatch,
-  });
 
   const handleSkip = useCallback(() => {
     engine.skip(tracker.getStatsAndReset());
-  }, [engine, tracker]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [engine.skip, tracker.getStatsAndReset]);
 
   const summary = useMemo(() => {
     if (status !== STATUS.FINISHED) return null;
@@ -101,10 +103,7 @@ export function PomodoroApp() {
 
           {status === STATUS.AWAITING_ACK && (
             <OvertimeBanner
-              keyword={settings.keyword}
               overtimeSec={overtimeSec}
-              voiceSupported={voice.supported}
-              voiceListening={voice.listening}
               onAcknowledge={handleAcknowledge}
               accentColor={currentAccent}
             />

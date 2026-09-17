@@ -58,8 +58,8 @@ function reducer(state, action) {
       };
     }
 
-    // Used both when a phase is acknowledged (voice/manual) and when it's
-    // manually skipped — caller supplies the finished log `entry` and the
+    // Used both when a phase is manually acknowledged and when it's manually
+    // skipped — caller supplies the finished log `entry` and the
     // already-computed `nextPhase` to run.
     case "ADVANCE":
       return {

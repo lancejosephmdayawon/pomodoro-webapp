@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 /**
  * Tracks tab-switch / window-blur behavior while `active` is true (meant to
@@ -36,7 +36,10 @@ export function useVisibilityTracker(active) {
     };
   }, [active]);
 
-  const getStatsAndReset = () => {
+  // Stable across renders (no deps — everything it touches lives in refs) so
+  // consumers that depend on it directly (e.g. PomodoroApp) don't get a new
+  // function identity every render.
+  const getStatsAndReset = useCallback(() => {
     // If the tab is still hidden right as we read (e.g. phase ended while
     // away), fold in the time elapsed so far before resetting.
     if (hiddenAtRef.current != null) {
@@ -47,7 +50,7 @@ export function useVisibilityTracker(active) {
     const stats = { ...statsRef.current };
     statsRef.current = { tabSwitchCount: 0, distractedSec: 0 };
     return stats;
-  };
+  }, []);
 
   return { getStatsAndReset };
 }

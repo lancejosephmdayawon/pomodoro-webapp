@@ -9,7 +9,7 @@ export function Brand() {
         <Image src="/images/logo.png" alt="" width={32} height={32} priority className="h-full w-full object-contain" />
       </span>
       <div className="text-left">
-        <p className="text-sm font-semibold tracking-tight text-white">Voice-Ack</p>
+        <p className="text-sm font-semibold tracking-tight text-white">Lock-In</p>
         <p className="-mt-0.5 text-xs text-zinc-500">Pomodoro</p>
       </div>
     </div>
