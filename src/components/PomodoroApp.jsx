@@ -91,6 +91,8 @@ export function PomodoroApp() {
           archetype={summary.archetype}
           onNewSession={() => engine.reset()}
           accentColor={theme.primaryColor}
+          log={log}
+          theme={theme}
         />
       ) : (
         <>

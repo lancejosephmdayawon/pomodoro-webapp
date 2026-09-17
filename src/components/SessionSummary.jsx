@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { Download, RotateCcw } from "lucide-react";
 import { drawSummaryCard, preloadLogo } from "../lib/summaryCard";
 import { getContrastText } from "../lib/color";
+import { OvertimeChart, TimeSplitChart } from "./SummaryCharts";
 
 function StatTile({ label, value }) {
   return (
@@ -14,7 +15,7 @@ function StatTile({ label, value }) {
   );
 }
 
-export function SessionSummary({ metrics, archetype, onNewSession, accentColor }) {
+export function SessionSummary({ metrics, archetype, onNewSession, accentColor, log, theme }) {
   const canvasRef = useRef(null);
   const logoRef = useRef(null);
   const Icon = archetype.icon;
@@ -70,6 +71,11 @@ export function SessionSummary({ metrics, archetype, onNewSession, accentColor }
           <li key={r}>“{r}”</li>
         ))}
       </ul>
+
+      <div className="flex w-full flex-col gap-4 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+        <TimeSplitChart metrics={metrics} theme={theme} />
+        <OvertimeChart log={log} theme={theme} />
+      </div>
 
       <div className="grid w-full grid-cols-2 gap-2">
         <StatTile label="Lock-ins completed" value={metrics.completedLockIns} />
